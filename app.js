@@ -63,7 +63,7 @@ function abrirServicio(key) {
 }
 
 function compartir() {
-  var data = { title: 'SAMEM · Seguridad electrónica', text: 'CCTV, alarmas, control de acceso y ascensores. Atención 24 horas.', url: CONFIG.url };
+  var data = { title: 'SAMEM · Empresa de seguridad en el hogar', text: 'Instalación, mantenimiento y reparación de cámaras, alarmas y plataformas de elevación vertical. Atención 24/7.', url: CONFIG.url };
   if (navigator.share) {
     navigator.share(data).catch(function () {});
   } else if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -73,7 +73,7 @@ function compartir() {
   }
 }
 
-/* ── Carrusel dinámico (galería) ── */
+/* ── Carrusel dinámico (galería + servicios) ── */
 function initCarrusel() {
   document.querySelectorAll('[data-carrusel]').forEach(function (root) {
     var track = root.querySelector('[data-track]');
@@ -81,8 +81,10 @@ function initCarrusel() {
     var prev = root.querySelector('[data-prev]');
     var next = root.querySelector('[data-next]');
     if (!track) return;
-    var slides = Array.prototype.slice.call(track.querySelectorAll('.slide'));
+    var slides = Array.prototype.slice.call(track.children);
     if (!slides.length) return;
+    var label = root.getAttribute('data-label') || 'elemento';
+    var auto = root.hasAttribute('data-autoplay');
 
     var dots = [];
     var current = 0;
@@ -91,10 +93,12 @@ function initCarrusel() {
     function goTo(i) {
       var n = slides.length;
       current = ((i % n) + n) % n;
-      track.scrollTo({ left: slides[current].offsetLeft - track.offsetLeft, behavior: 'smooth' });
+      var left = slides[current].offsetLeft - track.offsetLeft - (track.clientWidth - slides[current].clientWidth) / 2;
+      track.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
       dots.forEach(function (d, idx) { d.classList.toggle('active', idx === current); });
     }
     function startAuto() {
+      if (!auto) return;
       stopAuto();
       autoTimer = setInterval(function () { goTo(current + 1); }, 4000);
     }
@@ -106,7 +110,8 @@ function initCarrusel() {
         var b = document.createElement('button');
         b.type = 'button';
         b.className = 'dot' + (idx === 0 ? ' active' : '');
-        b.setAttribute('aria-label', 'Ir a la imagen ' + (idx + 1));
+        var pre = label === 'imagen' ? 'a la imagen' : (label === 'servicio' ? 'al servicio' : 'al ' + label);
+        b.setAttribute('aria-label', 'Ir ' + pre + ' ' + (idx + 1));
         b.addEventListener('click', function () { goTo(idx); startAuto(); });
         dotsWrap.appendChild(b);
         dots.push(b);
@@ -115,17 +120,19 @@ function initCarrusel() {
     if (prev) prev.addEventListener('click', function () { goTo(current - 1); startAuto(); });
     if (next) next.addEventListener('click', function () { goTo(current + 1); startAuto(); });
 
-    root.addEventListener('mouseenter', stopAuto);
-    root.addEventListener('mouseleave', startAuto);
-    root.addEventListener('touchstart', stopAuto, { passive: true });
-    root.addEventListener('touchend', startAuto, { passive: true });
+    if (auto) {
+      root.addEventListener('mouseenter', stopAuto);
+      root.addEventListener('mouseleave', startAuto);
+      root.addEventListener('touchstart', stopAuto, { passive: true });
+      root.addEventListener('touchend', startAuto, { passive: true });
 
-    if ('IntersectionObserver' in window) {
-      var io = new IntersectionObserver(function (entries) {
-        entries.forEach(function (en) { if (en.isIntersecting) startAuto(); else stopAuto(); });
-      }, { threshold: 0.3 });
-      io.observe(root);
-    } else { startAuto(); }
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function (entries) {
+          entries.forEach(function (en) { if (en.isIntersecting) startAuto(); else stopAuto(); });
+        }, { threshold: 0.3 });
+        io.observe(root);
+      } else { startAuto(); }
+    }
 
     var ticking = false;
     track.addEventListener('scroll', function () {

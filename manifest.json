@@ -1,7 +1,7 @@
 {
-  "name": "SAMEM — Seguridad Electrónica",
+  "name": "SAMEM — Seguridad en el Hogar",
   "short_name": "SAMEM",
-  "description": "Soluciones en seguridad electrónica: CCTV, alarmas, control de acceso, video porteros y mantenimiento de ascensores.",
+  "description": "Empresa de seguridad en el hogar. Instalación, mantenimiento y reparación de cámaras de seguridad, alarmas, plataformas de elevación vertical y soluciones tecnológicas.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
